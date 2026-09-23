@@ -82,4 +82,33 @@ To run the project, set `Restaurants.API` as the startup project in Visual Studi
 
 The tests are located in the `tests/*` directory. You can run them using the test runner in Visual Studio.
 
+## Development Container (`.devcontainer/devcontainer.json`)
+
+The `.devcontainer/devcontainer.json` file defines a **Dev Container** — a fully configured, Docker-based development environment that can be opened directly in Visual Studio Code (via the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)) or in GitHub Codespaces.
+
+Using a dev container means every contributor gets the same toolchain, OS, and dependencies without having to install anything manually on their local machine.
+
+### What each section does in this project
+
+| Section | Purpose |
+|---|---|
+| `name` | A human-readable label for the container ("Restaurants API .NET 8"). |
+| `image` | The base Docker image. Here it is `mcr.microsoft.com/devcontainers/dotnet:1-8.0-jammy` — a Microsoft-provided Ubuntu 22.04 (Jammy) image with the .NET 8 SDK preinstalled. |
+| `features` | Extra capabilities installed on top of the base image: **Git** (version control CLI), **GitHub CLI** (`gh`), and **MSSQL** (SQL Server tools and a running SQL Server instance on port 1433). |
+| `forwardPorts` | Ports `5000` and `5001` (the ASP.NET development server) and `1433` (SQL Server) are forwarded from inside the container to your local machine so you can reach the API and database normally. |
+| `containerEnv` | Sets the `ConnectionStrings__RestaurantsDb` environment variable so the API can connect to the SQL Server instance that the MSSQL feature started inside the same container. |
+| `customizations.vscode` | Installs two VS Code extensions automatically (`ms-dotnettools.csharp` for C# language support and `JakubKozera.csharp-dev-tools`) and configures editor settings (Roslyn language server, auto-import completions, format-on-save, and organize-imports-on-save). |
+| `postCreateCommand` | Runs **once** after the container is created for the first time: restores NuGet packages (`dotnet restore`), restores local .NET tools (`dotnet tool restore`), and applies any pending Entity Framework migrations to create/update the database. |
+| `postStartCommand` | Runs **every time** the container starts: builds the entire solution (`dotnet build`) so you know immediately if anything is broken. |
+| `remoteUser` | The container process runs as the non-root `vscode` user for better security. |
+
+### How to use it
+
+1. Install the [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension in VS Code.
+2. Open this repository folder in VS Code.
+3. When prompted, choose **"Reopen in Container"** (or run the **Dev Containers: Reopen in Container** command from the Command Palette).
+4. VS Code will build/pull the image, install features, run `postCreateCommand`, and drop you into a fully ready environment.
+
+Alternatively, open the repository in [GitHub Codespaces](https://github.com/features/codespaces) — the same `devcontainer.json` is used automatically.
+
  
